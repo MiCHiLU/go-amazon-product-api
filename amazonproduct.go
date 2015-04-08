@@ -81,6 +81,30 @@ func (api AmazonProductAPI) ItemSearch(SearchIndex string, Parameters map[string
 }
 
 /*
+SimilarityLookup takes an array of product IDs (ASIN) and returns the result
+*/
+func (api AmazonProductAPI) SimilarityLookup(ItemIds []string) (string, error) {
+	params := map[string]string{
+		"ItemId":        strings.Join(ItemIds, ","),
+		"ResponseGroup": "Images,ItemAttributes,Small,EditorialReview",
+	}
+
+	return api.genSignAndFetch("SimilarityLookup", params)
+}
+
+/*
+SimilarityLookupWithResponseGroup takes an array of product ID (ASIN) and a ResponseGroup and returns the result
+*/
+func (api AmazonProductAPI) SimilarityLookupWithResponseGroup(ItemIds []string, ResponseGroup string) (string, error) {
+	params := map[string]string{
+		"ItemId":        strings.Join(ItemIds, ","),
+		"ResponseGroup": ResponseGroup,
+	}
+
+	return api.genSignAndFetch("SimilarityLookup", params)
+}
+
+/*
 CartCreate takes a map containing ASINs and quantities. Up to 10 items are allowed
 */
 func (api AmazonProductAPI) CartCreate(items map[string]int) (string, error) {
