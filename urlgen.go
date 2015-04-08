@@ -13,6 +13,19 @@ import (
 	"time"
 )
 
+var (
+	Interval  = time.Duration(560) * time.Millisecond // > 2000/h, 1/0.556msec
+	semaphore = make(chan Token, 1)
+	token     = Token{}
+)
+
+func init() {
+	semaphore <- token
+}
+
+type Token struct {
+}
+
 type AmazonProductAPI struct {
 	AccessKey    string
 	SecretKey    string
@@ -35,11 +48,15 @@ func (api AmazonProductAPI) genSignAndFetch(Operation string, Parameters map[str
 	}
 
 	var resp *http.Response
+	<-semaphore
 	if api.Client == nil {
 		resp, err = http.Get(signedurl)
 	} else {
 		resp, err = api.Client.Get(signedurl)
 	}
+	time.AfterFunc(Interval, func() {
+		semaphore <- token
+	})
 	if err != nil {
 		return "", err
 	}
